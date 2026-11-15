@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 import { GlassIconReveal } from "@/components/ui/liquid-glass-logo-reveal";
 import InteractiveNebulaShader from "@/components/ui/liquid-shader";
 
+const pub = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
+
 const NAV = [
   ["#about", "О нас"],
   ["#tariffs", "Тарифы"],
@@ -56,11 +58,11 @@ function VenueMap({ cropped = false }: { cropped?: boolean }) {
 type BookKind = keyof typeof TITLES;
 
 const REEL: [string, string, boolean][] = [
-  ["/Photo/8.webp", "Гостья River Haze с кальяном", false],
-  ["/Photo/1.webp", "Бармен наливает коктейль", true],
-  ["/Photo/6.webp", "PlayStation и два геймпада", false],
-  ["/Photo/3.webp", "Полка с настольными играми", false],
-  ["/Photo/7.webp", "Настольные игры крупным планом", false],
+  [pub("/Photo/8.webp"), "Гостья River Haze с кальяном", false],
+  [pub("/Photo/1.webp"), "Бармен наливает коктейль", true],
+  [pub("/Photo/6.webp"), "PlayStation и два геймпада", false],
+  [pub("/Photo/3.webp"), "Полка с настольными играми", false],
+  [pub("/Photo/7.webp"), "Настольные игры крупным планом", false],
 ];
 
 const band = "px-4 py-16 md:px-8 md:py-32";
@@ -153,7 +155,7 @@ const FOLD_BY_HASH: Partial<Record<string, Fold>> = {
 
 function Chevron({ up }: { up: boolean }) {
   return (
-    <img src="/chevron.svg" alt="" width={29} height={16} className={up ? "-scale-y-100" : ""} />
+    <img src={pub("/chevron.svg")} alt="" width={29} height={16} className={up ? "-scale-y-100" : ""} />
   );
 }
 
@@ -227,7 +229,7 @@ function MobilePage({
         </div>
         <div className="flex flex-col gap-2">
           <img
-            src="/Photo/8.webp"
+            src={pub("/Photo/8.webp")}
             alt="Гостья River Haze с кальяном"
             className="h-[272px] w-full rounded-[32px] object-cover object-[center_20%]"
           />
@@ -251,7 +253,7 @@ function MobilePage({
 
       <section id="about" className="relative flex scroll-mt-16 flex-col gap-4 p-4">
         <img
-          src="/shapes.svg"
+          src={pub("/shapes.svg")}
           alt=""
           width={297.221}
           height={221.987}
@@ -273,7 +275,7 @@ function MobilePage({
         <div className="flex flex-col gap-1 overflow-hidden rounded-[32px] bg-white/10">
         <FoldRow anchor="events" title="Караоке комната" open={fold.includes("events")} onToggle={() => onToggle("events")}>
           <img
-            src="/Photo/2.webp"
+            src={pub("/Photo/2.webp")}
             alt="Общий зал с диванами и экраном"
             className="h-[432px] w-full rounded-[32px] object-cover"
           />
@@ -293,8 +295,8 @@ function MobilePage({
         <FoldRow anchor="games" title="Игровая зона" open={fold.includes("games")} onToggle={() => onToggle("games")}>
           <div className="snap-row flex gap-2.5 overflow-x-auto">
             {[
-              ["/Photo/6.webp", "Экран с EA FC 24 и геймпады PlayStation"],
-              ["/Photo/3.webp", "Стеллаж с настольными играми: Бункер, Alias, Манчкин"],
+              [pub("/Photo/6.webp"), "Экран с EA FC 24 и геймпады PlayStation"],
+              [pub("/Photo/3.webp"), "Стеллаж с настольными играми: Бункер, Alias, Манчкин"],
             ].map(([src, alt]) => (
               <img key={src} src={src} alt={alt} className="aspect-square w-full shrink-0 snap-start rounded-[30px] object-cover" />
             ))}
@@ -318,7 +320,7 @@ function MobilePage({
 
         <FoldRow anchor="menu" title="Еда" open={fold.includes("menu")} onToggle={() => onToggle("menu")}>
           <img
-            src="/Photo/5.webp"
+            src={pub("/Photo/5.webp")}
             alt="Банки крафтового пива в холодильнике"
             className="aspect-square w-full rounded-[32px] object-cover object-[center_20%]"
           />
@@ -338,7 +340,7 @@ function MobilePage({
 
         <FoldRow title="Напитки" open={fold.includes("bar")} onToggle={() => onToggle("bar")}>
           <img
-            src="/Photo/1.webp"
+            src={pub("/Photo/1.webp")}
             alt="Бармен наливает коктейль"
             className="aspect-square w-full rounded-[32px] object-cover"
           />
@@ -430,7 +432,7 @@ export default function App() {
       {intro && (
         <div className="fixed inset-0 z-[80] bg-[#07061a]">
           <GlassIconReveal
-            logo="/Logo.svg"
+            logo={pub("/Logo.svg")}
             look="dark"
             originalColors
             iconPlate={false}
@@ -447,7 +449,7 @@ export default function App() {
       <header className={`fixed inset-x-0 top-0 z-50 grid h-16 grid-cols-3 items-center px-4 transition-opacity duration-500 md:h-auto md:grid-cols-[auto_1fr_auto] md:gap-8 md:bg-transparent md:px-8 md:py-4 ${chrome ? "opacity-100" : "pointer-events-none opacity-0"}`}>
         <span className="md:hidden" />
         <a href="#top" className="justify-self-center md:justify-self-start" aria-label="River Haze, наверх">
-          <img src="/Logo.svg" alt="" width="80" height="80" className="h-9 w-9 md:h-[46px] md:w-[46px]" />
+          <img src={pub("/Logo.svg")} alt="" width="80" height="80" className="h-9 w-9 md:h-[46px] md:w-[46px]" />
         </a>
         <nav className="hidden items-center justify-center gap-4 md:flex" aria-label="Разделы">
           {NAV.map(([href, label]) => (
@@ -496,7 +498,7 @@ export default function App() {
       <main id="top">
         <section className="relative min-h-svh">
           <img
-            src="/Logo.svg"
+            src={pub("/Logo.svg")}
             alt="River Haze"
             width="80"
             height="80"
@@ -533,7 +535,7 @@ export default function App() {
               Забронировать
             </button>
             <a
-              href="/menu.pdf"
+              href={pub("/menu.pdf")}
               target="_blank"
               rel="noopener"
               className="rounded-[32px] px-8 py-4 text-center text-sm leading-[18.72px] tracking-[1.5px] text-[rgba(244,241,234,0.6)] uppercase no-underline"
@@ -569,7 +571,7 @@ export default function App() {
             </div>
           </div>
           <div className="mt-8 md:mt-16 md:grid md:grid-cols-[1.3fr_0.7fr] md:items-end md:gap-16">
-            <img src="/Photo/4.webp" alt="Кальян и карточки River Haze Lounge" className="hidden aspect-[16/10] w-full object-cover md:block" />
+            <img src={pub("/Photo/4.webp")} alt="Кальян и карточки River Haze Lounge" className="hidden aspect-[16/10] w-full object-cover md:block" />
             <ol className="list-none border-t border-[var(--rh-line)] p-0">
               {[
                 ["Без скрытых доплат", "Платите только за проведённое время."],
@@ -587,7 +589,7 @@ export default function App() {
 
         <section className="bg-reel" aria-label="Атмосфера">
           <img
-            src="/Photo/8.webp"
+            src={pub("/Photo/8.webp")}
             alt="Гостья River Haze с кальяном"
             className="aspect-[4/3] w-full object-cover object-[center_20%] md:hidden"
           />
@@ -634,7 +636,7 @@ export default function App() {
         <section id="events" className={`bg-events ${band}`}>
           <Index n="03" label="Аренда зала" />
           <div className="md:grid md:grid-cols-[0.85fr_1.15fr] md:items-end md:gap-16">
-            <img src="/Photo/2.webp" alt="Общий зал с диванами и экраном" className="-mx-4 aspect-[4/5] w-[calc(100%+2rem)] max-w-none object-cover md:mx-0 md:w-full" />
+            <img src={pub("/Photo/2.webp")} alt="Общий зал с диванами и экраном" className="-mx-4 aspect-[4/5] w-[calc(100%+2rem)] max-w-none object-cover md:mx-0 md:w-full" />
             <div className="mt-8 md:mt-0">
               <h2 className="type-display">
                 Весь зал — только для вашей компании
@@ -683,8 +685,8 @@ export default function App() {
           </p>
           <div className="mt-8 flex flex-col gap-16 md:hidden">
             {[
-              ["/Photo/6.webp", "PlayStation", "Актуальные хиты (FIFA, Mortal Kombat, UFC и другие) на больших экранах с отличным звуком.", "Экран с EA FC 24 и геймпады PlayStation"],
-              ["/Photo/3.webp", "Настольные игры", "От быстрых пати-геймов («Бункер», «Мафия», «Уно») до глубоких стратегий на всю ночь.", "Стеллаж с настольными играми: Бункер, Alias, Манчкин"],
+              [pub("/Photo/6.webp"), "PlayStation", "Актуальные хиты (FIFA, Mortal Kombat, UFC и другие) на больших экранах с отличным звуком.", "Экран с EA FC 24 и геймпады PlayStation"],
+              [pub("/Photo/3.webp"), "Настольные игры", "От быстрых пати-геймов («Бункер», «Мафия», «Уно») до глубоких стратегий на всю ночь.", "Стеллаж с настольными играми: Бункер, Alias, Манчкин"],
             ].map(([src, title, text, alt]) => (
               <article key={title}>
                 <img src={src} alt={alt} className="-mx-4 aspect-[4/5] w-[calc(100%+2rem)] max-w-none object-cover" />
@@ -694,7 +696,7 @@ export default function App() {
             ))}
           </div>
           <div className="mt-16 hidden md:grid md:grid-cols-[1.25fr_0.75fr] md:items-end md:gap-x-8 md:gap-y-4">
-            <img src="/Photo/6.webp" alt="Экран с EA FC 24 и геймпады PlayStation" className="aspect-[16/10] w-full object-cover" />
+            <img src={pub("/Photo/6.webp")} alt="Экран с EA FC 24 и геймпады PlayStation" className="aspect-[16/10] w-full object-cover" />
             <div>
               <h3 className="type-title">PlayStation</h3>
               <p className="mute mt-4">Актуальные хиты (FIFA, Mortal Kombat, UFC и другие) на больших экранах с отличным звуком.</p>
@@ -703,7 +705,7 @@ export default function App() {
               <h3 className="type-title">Настольные игры</h3>
               <p className="mute mt-4">От быстрых пати-геймов («Бункер», «Мафия», «Уно») до глубоких стратегий на всю ночь.</p>
             </div>
-            <img src="/Photo/3.webp" alt="Стеллаж с настольными играми: Бункер, Alias, Манчкин" className="-mt-16 aspect-[4/5] w-full object-cover" />
+            <img src={pub("/Photo/3.webp")} alt="Стеллаж с настольными играми: Бункер, Alias, Манчкин" className="-mt-16 aspect-[4/5] w-full object-cover" />
           </div>
         </section>
 
@@ -717,7 +719,7 @@ export default function App() {
           </div>
           <div className="mt-8 md:mt-16 md:grid md:grid-cols-[1fr_1fr_0.8fr] md:items-start md:gap-16">
             <img
-              src="/Photo/5.webp"
+              src={pub("/Photo/5.webp")}
               alt="Банки крафтового пива в холодильнике"
               className="-mx-4 mb-8 aspect-[3/4] w-[calc(100%+2rem)] max-w-none object-cover object-[center_20%] md:order-3 md:mx-0 md:mb-0 md:w-full"
             />
