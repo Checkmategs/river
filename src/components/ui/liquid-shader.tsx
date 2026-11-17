@@ -159,7 +159,7 @@ export function InteractiveNebulaShader({
 
   return (
     <div className={`pointer-events-none fixed inset-0 overflow-hidden bg-background ${className}`} aria-hidden="true">
-      <div ref={containerRef} className="absolute -inset-[18%] blur-[64px]" />
+      <div ref={containerRef} className="absolute -inset-[18%] opacity-35 blur-[64px]" />
     </div>
   );
 }

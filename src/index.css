@@ -71,6 +71,63 @@ body {
   letter-spacing: -0.03em;
 }
 
+@font-face {
+  font-family: "Bebas Neue Cyr";
+  src: url("./fonts/BebasNeue-Cyrillic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-bebas {
+  font-family: "Bebas Neue Cyr", Impact, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.sme {
+  display: block;
+  transform: scaleX(1.11);
+  transform-origin: left top;
+}
+
+.sme-end,
+.sme-center {
+  display: inline-block;
+  transform: scaleX(1.11);
+}
+
+.sme-end {
+  transform-origin: right center;
+}
+
+.sme-center {
+  transform-origin: center;
+}
+
+.exp {
+  display: inline-block;
+  letter-spacing: -1.62px;
+  transform: scaleX(1.33);
+  transform-origin: left center;
+}
+
+.rh-ruble {
+  position: relative;
+  display: inline-block;
+}
+
+.rh-ruble::after {
+  content: "";
+  position: absolute;
+  top: 62%;
+  left: 7%;
+  width: 86%;
+  height: 0.075em;
+  background: currentColor;
+}
+
 @media (min-width: 54rem) {
   .type-display {
     font-size: clamp(2.5rem, 4.6vw, 4.4rem);

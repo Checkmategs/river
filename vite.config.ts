@@ -5,6 +5,9 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   base: "./",
+  server: {
+    allowedHosts: [".a.2na.am", ".tuna.am"],
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

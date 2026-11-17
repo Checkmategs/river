@@ -145,34 +145,121 @@ function useNarrow() {
   return narrow;
 }
 
-type Fold = "events" | "games" | "menu" | "bar";
+type Fold = "events" | "ps" | "games" | "menu" | "bar";
 
 const FOLD_BY_HASH: Partial<Record<string, Fold>> = {
   "#events": "events",
-  "#games": "games",
+  "#games": "ps",
   "#menu": "menu",
 };
 
-function Chevron({ up }: { up: boolean }) {
-  return (
-    <img src={pub("/chevron.svg")} alt="" width={29} height={16} className={up ? "-scale-y-100" : ""} />
-  );
+type Shot = { src: string; left: string; top: string; width: string; height: string };
+
+const FULL: Shot = { src: "", left: "0", top: "0", width: "100%", height: "100%" };
+const CROP_C: Shot = { src: "/mobile/bubble-c.png", left: "-0.59%", top: "-1.74%", width: "100%", height: "112.45%" };
+const CROP_48: Shot = { src: "/mobile/cover-48.png", left: "-6.818%", top: "-6.818%", width: "112.5%", height: "112.5%" };
+const CROP_47: Shot = { src: "/mobile/cover-47.png", left: "-18.075%", top: "0", width: "134.94%", height: "104.82%" };
+const CROP_50: Shot = { src: "/mobile/cover-50.png", left: "-55.229%", top: "-8.952%", width: "210.03%", height: "118.14%" };
+
+const PS_BUBBLES: { left: number; top: number; size: number; shots: Shot[] }[] = [
+  { left: 45, top: 53.81, size: 59, shots: [{ ...FULL, src: "/mobile/bubble-a.png" }] },
+  { left: 307, top: 53.81, size: 78, shots: [{ ...FULL, src: "/mobile/bubble-b.png" }] },
+  { left: 138, top: 28.81, size: 137, shots: [CROP_C] },
+  { left: 281, top: 218.81, size: 88, shots: [CROP_48] },
+  { left: 74.5, top: 139.31, size: 53, shots: [CROP_47] },
+  { left: 39, top: 227.31, size: 105, shots: [CROP_50] },
+  { left: 184, top: 222.81, size: 57, shots: [{ ...FULL, src: "/mobile/bubble-d.png" }] },
+];
+
+const BOARD_BUBBLES: { left: number; top: number; size: number; shots: Shot[] }[] = [
+  { left: 45, top: 53.81, size: 59, shots: [{ ...FULL, src: "/mobile/bubble-a.png" }] },
+  { left: 304, top: 98.81, size: 78, shots: [{ ...FULL, src: "/mobile/bubble-b.png" }] },
+  { left: 150, top: 41.81, size: 137, shots: [CROP_C] },
+  { left: 281, top: 218.81, size: 88, shots: [CROP_48] },
+  { left: 85, top: 151.81, size: 53, shots: [CROP_47] },
+  { left: 33, top: 226.81, size: 105, shots: [CROP_50] },
+  { left: 184, top: 222.81, size: 57, shots: [{ ...FULL, src: "/mobile/bubble-d.png" }] },
+];
+
+function money(value: string) {
+  const parts = value.split("₽");
+  return parts.map((part, index) => (
+    <span key={`${part}-${index}`}>
+      {part}
+      {index < parts.length - 1 ? <span className="rh-ruble">Р</span> : null}
+    </span>
+  ));
 }
 
-function PriceCard({ rows }: { rows: [string, string][] }) {
+function BubbleField({ bubbles }: { bubbles: typeof PS_BUBBLES }) {
   return (
-    <div className="overflow-hidden rounded-[32px] border-t border-white/16 bg-white/10">
-      {rows.map(([label, value]) => (
-        <div key={label} className="flex items-center justify-between gap-4 border-b border-white/16 p-4">
-          <span className="type-label mute">{label}</span>
-          <span className="type-title text-right">{value}</span>
+    <div className="relative h-[360px] w-full overflow-hidden rounded-[32px] border-t border-white/8 bg-white/5">
+      {bubbles.map((bubble) => (
+        <div
+          key={`${bubble.left}-${bubble.top}`}
+          className="absolute overflow-hidden rounded-full bg-white"
+          style={{
+            left: `${(bubble.left / 430) * 100}%`,
+            top: `${(bubble.top / 360) * 100}%`,
+            width: `${(bubble.size / 430) * 100}%`,
+            aspectRatio: "1",
+          }}
+        >
+          {bubble.shots.map((shot) => (
+            <img
+              key={shot.src}
+              src={pub(shot.src)}
+              alt=""
+              className="absolute max-w-none object-cover"
+              style={{ left: shot.left, top: shot.top, width: shot.width, height: shot.height }}
+            />
+          ))}
         </div>
       ))}
     </div>
   );
 }
 
-function FoldRow({
+function PriceRows({ rows, loose = false }: { rows: [string, string][]; loose?: boolean }) {
+  return (
+    <div className={`overflow-hidden rounded-[32px] border-t border-white/8 bg-white/5 p-4 ${loose ? "flex flex-col gap-2" : ""}`}>
+      {rows.map(([label, value], index) => (
+        <div
+          key={`${label}-${index}`}
+          className={`flex items-center justify-between gap-4 p-4 ${index < rows.length - 1 ? "border-b border-white/8" : ""}`}
+        >
+          <span className="text-base leading-5 font-medium text-white/40">{label}</span>
+          <span className="font-bebas sme-end text-[25px] leading-none whitespace-nowrap text-white">{money(value)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StoryCard({
+  src,
+  alt,
+  title,
+  text,
+  fade = "to-black/60",
+}: {
+  src: string;
+  alt: string;
+  title: ReactNode;
+  text: string;
+  fade?: string;
+}) {
+  return (
+    <div className="relative flex h-[520px] w-full flex-col justify-end gap-2.5 overflow-hidden rounded-[32px] px-4 pt-4 pb-6">
+      <img src={src} alt={alt} className="absolute inset-0 size-full object-cover" />
+      <div className={`absolute inset-0 bg-gradient-to-b from-transparent from-[63%] ${fade}`} />
+      <h3 className="font-bebas sme relative text-[36px] leading-none text-white">{title}</h3>
+      <p className="relative text-base leading-5 font-medium text-white/40">{text}</p>
+    </div>
+  );
+}
+
+function FoldCard({
   anchor,
   title,
   open,
@@ -186,19 +273,22 @@ function FoldRow({
   children: ReactNode;
 }) {
   return (
-    <div id={anchor} className="scroll-mt-16">
+    <div id={anchor} className="w-full scroll-mt-16 overflow-hidden rounded-[32px] bg-white/8">
       <button
         type="button"
         aria-expanded={open}
         onClick={onToggle}
-        className="flex h-[76px] w-full items-center justify-between border-b border-white/16 py-[26px] pr-8 pl-6 text-left text-base uppercase"
+        className="flex w-full items-center justify-between p-7 text-left"
       >
-        {title}
-        <Chevron up={open} />
+        <span className="text-base leading-5 font-medium">{title}</span>
+        <img src={pub("/mobile/chevron.svg")} alt="" className={open ? "-scale-y-100" : ""} />
       </button>
-      <div className={`grid motion-safe:transition-[grid-template-rows] motion-safe:duration-300 ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+      <div
+        onClick={open ? onToggle : undefined}
+        className={`grid motion-safe:transition-[grid-template-rows] motion-safe:duration-300 ${open ? "cursor-pointer grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+      >
         <div className="overflow-hidden">
-          <div className="flex flex-col gap-4 p-4">{children}</div>
+          <div className="flex flex-col gap-2 rounded-[32px] border border-white/8 p-2">{children}</div>
         </div>
       </div>
     </div>
@@ -213,169 +303,169 @@ function MobilePage({
   onToggle: (id: Fold) => void;
 }) {
   return (
-    <>
-      <section id="tariffs" className="flex scroll-mt-16 flex-col gap-8 px-4 pt-4 pb-12">
-        <div className="flex flex-col gap-4 py-4">
-          <h2 className="type-display">
+    <div className="flex flex-col gap-6 overflow-x-clip">
+      <section id="tariffs" className="flex scroll-mt-16 flex-col gap-6 p-4">
+        <div className="relative h-[432px] overflow-hidden rounded-[30px]">
+          <img src={pub("/mobile/hookah.png")} alt="Гостья River Haze с кальяном" className="absolute inset-0 size-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent from-[52%] to-black/60" />
+        </div>
+        <div className="flex flex-col gap-4">
+          <h2 className="font-bebas sme text-[36px] leading-none text-white">
             Отдыхайте
             <br />
-            по своим
-            <br />
-            правилам
+            по своим правилам
           </h2>
-          <p className="mute">
+          <p className="text-base leading-5 font-medium text-white/40">
             Прозрачная система оплаты. Первый час фиксированный, далее — поминутная тарификация. В тариф уже входит базовый дымный кальян, безлимитный чай и печенье, игры на PlayStation и большая коллекция настольных игр.
           </p>
         </div>
-        <div className="flex flex-col gap-2">
-          <img
-            src={pub("/Photo/8.webp")}
-            alt="Гостья River Haze с кальяном"
-            className="h-[272px] w-full rounded-[32px] object-cover object-[center_20%]"
-          />
-          <div className="overflow-hidden rounded-[32px] border-t border-white/16 bg-white/10">
-            {[
-              ["Соло-отдых", "1 человек", "450 ₽", "первый час · далее 6 ₽ / минута"],
-              ["Для компании", "от 2 человек", "550 ₽", "первый час / чел. · далее 6 ₽ / минута"],
-            ].map(([who, whoSub, sum, per]) => (
-              <article key={who} className="border-b border-white/16 px-6 py-8">
-                <p className="type-label flex justify-between gap-4">
-                  {who}
-                  <span className="mute">{whoSub}</span>
-                </p>
-                <p className="type-price my-4">{sum}</p>
-                <p className="mute">{per}</p>
-              </article>
-            ))}
-          </div>
+        <div className="overflow-hidden rounded-[32px] border-t border-white/8 bg-white/8">
+          {[
+            ["Для компании", "от 2 человек", "450 ₽", "первый час · далее 6 ₽ / минута"],
+            ["Соло-отдых", "1 человек", "550 ₽", "первый час / чел. · далее 6 ₽ / минута"],
+          ].map(([who, whoSub, sum, per], index) => (
+            <article key={who} className={`p-6 ${index === 0 ? "border-b border-white/8" : ""}`}>
+              <p className="flex items-start justify-between gap-4 text-base leading-5 font-medium">
+                {who}
+                <span className="text-white/40">{whoSub}</span>
+              </p>
+              <p className="font-bebas exp pt-4 text-[60px] leading-[64.8px] text-white">{money(sum)}</p>
+              <p className="pt-4 text-base leading-5 font-medium text-white/40">{per}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section id="about" className="relative flex scroll-mt-16 flex-col gap-4 p-4">
-        <img
-          src={pub("/shapes.svg")}
-          alt=""
-          width={297.221}
-          height={221.987}
-          className="pointer-events-none absolute top-[-90px] left-[183px]"
-        />
-        <h2 className="type-display">
-          Место,
-          <br />
-          где время останавливается,
-          <br />
-          а отдых начинается
-        </h2>
-        <p className="mute">
-          River Haze — это мультиформатное пространство для тех, кто ценит комфорт, свободу и качественный сервис. Мы объединили атмосферу закрытого лаунж-бара и демократичность тайм-кафе.
-        </p>
-      </section>
-
-      <div className="p-4">
-        <div className="flex flex-col gap-1 overflow-hidden rounded-[32px] bg-white/10">
-        <FoldRow anchor="events" title="Караоке комната" open={fold.includes("events")} onToggle={() => onToggle("events")}>
-          <img
-            src={pub("/Photo/2.webp")}
-            alt="Общий зал с диванами и экраном"
-            className="h-[432px] w-full rounded-[32px] object-cover"
-          />
-          <h2 className="type-display">Весь зал — только для вашей компании</h2>
-          <p className="mute">
-            Идеальное пространство для дня рождения, корпоратива, турнира по видеоиграм или громкого караоке-вечера без посторонних глаз.
-          </p>
-          <PriceCard
-            rows={[
-              ["1–5 человек", "3 000 ₽ / час"],
-              ["6–9 человек", "3 500 ₽ / час"],
-              ["10–15 человек", "4 000 ₽ / час"],
-            ]}
-          />
-        </FoldRow>
-
-        <FoldRow anchor="games" title="Игровая зона" open={fold.includes("games")} onToggle={() => onToggle("games")}>
-          <div className="snap-row flex gap-2.5 overflow-x-auto">
-            {[
-              [pub("/Photo/6.webp"), "Экран с EA FC 24 и геймпады PlayStation"],
-              [pub("/Photo/3.webp"), "Стеллаж с настольными играми: Бункер, Alias, Манчкин"],
-            ].map(([src, alt]) => (
-              <img key={src} src={src} alt={alt} className="aspect-square w-full shrink-0 snap-start rounded-[30px] object-cover" />
-            ))}
-          </div>
-          <h2 className="type-display">Скучно не будет никому</h2>
-          <p className="mute">
-            Соберите команду или устройте дуэль один на один. В вашем распоряжении топовые игровые консоли и проверенная временем классика.
-          </p>
-          <div className="rounded-[32px] bg-white/10">
-            {[
-              ["PlayStation", "Актуальные хиты (FIFA, Mortal Kombat, UFC и другие) на больших экранах с отличным звуком."],
-              ["Настольные игры", "От быстрых пати-геймов («Бункер», «Мафия», «Уно») до глубоких стратегий на всю ночь."],
-            ].map(([title, text]) => (
-              <div key={title} className="flex flex-col gap-4 p-4">
-                <h3 className="type-title">{title}</h3>
-                <p className="mute">{text}</p>
+      <div className="flex flex-col gap-4 p-1">
+        <section id="about" className="relative flex scroll-mt-16 flex-col gap-4 p-4">
+          <div className="pointer-events-none absolute top-[-108px] -right-32 flex h-[280px] w-[259px] items-center justify-center">
+            <div className="rotate-[22.28deg]">
+              <div className="relative h-[225.92px] w-[187.444px]">
+                <div className="absolute inset-[-153.5%_-221.53%_-184.46%_-206.32%]">
+                  <img src={pub("/mobile/shapes.svg")} alt="" className="block size-full max-w-none" />
+                </div>
               </div>
-            ))}
+            </div>
           </div>
-        </FoldRow>
+          <h2 className="font-bebas sme relative pr-16 text-[36px] leading-none text-white">
+            Место, где время останавливается,
+            <br />
+            а отдых начинается
+          </h2>
+          <p className="relative text-base leading-5 font-medium text-white/40">
+            River Haze — это мультиформатное пространство для тех, кто ценит комфорт, свободу и качественный сервис. Мы объединили атмосферу закрытого лаунж-бара и демократичность тайм-кафе.
+          </p>
+        </section>
 
-        <FoldRow anchor="menu" title="Еда" open={fold.includes("menu")} onToggle={() => onToggle("menu")}>
-          <img
-            src={pub("/Photo/5.webp")}
-            alt="Банки крафтового пива в холодильнике"
-            className="aspect-square w-full rounded-[32px] object-cover object-[center_20%]"
-          />
-          <h2 className="type-display">Подкрепиться и освежиться</h2>
-          <p className="mute">Сытный перекус или прохладный напиток — отдельно от тарифа за время.</p>
-          <PriceCard
-            rows={[
-              ["Пицца", "740 ₽"],
-              ["Хот-доги", "350 ₽"],
-              ["Начос", "350 ₽"],
-              ["Фисташки", "390 ₽"],
-              ["Вяленое мясо", "390 ₽"],
-              ["Арахис", "уточняйте"],
-            ]}
-          />
-        </FoldRow>
+        <div className="flex flex-col gap-2">
+          <FoldCard anchor="events" title="Караоке комната" open={fold.includes("events")} onToggle={() => onToggle("events")}>
+            <StoryCard
+              src={pub("/mobile/karaoke.png")}
+              alt="Общий зал с диванами и экраном"
+              title="Весь зал — только для вашей компании"
+              text="Идеальное пространство для дня рождения, корпоратива, турнира по видеоиграм или громкого караоке-вечера без посторонних глаз."
+            />
+            <PriceRows
+              rows={[
+                ["1–5 человек", "3 000 ₽ / час"],
+                ["6–9 человек", "3 500 ₽ / час"],
+                ["10–15 человек", "4 000 ₽ /час"],
+              ]}
+            />
+          </FoldCard>
 
-        <FoldRow title="Напитки" open={fold.includes("bar")} onToggle={() => onToggle("bar")}>
-          <img
-            src={pub("/Photo/1.webp")}
-            alt="Бармен наливает коктейль"
-            className="aspect-square w-full rounded-[32px] object-cover"
-          />
-          <h2 className="type-display">Бар</h2>
-          <p className="mute">Сытный перекус или прохладный напиток — отдельно от тарифа за время.</p>
-          <div className="overflow-hidden rounded-[32px] border-t border-white/16 bg-white/10">
-            {["Классический лагер", "Насыщенный стаут", "Ароматный IPA", "Освежающий саур-эль", "Фирменные лимонады", "Cola", "Mountain Dew"].map((name) => (
-              <p key={name} className="type-label mute border-b border-white/16 p-4">
-                {name}
-              </p>
-            ))}
-          </div>
-        </FoldRow>
+          <FoldCard anchor="games" title="Play Station 5" open={fold.includes("ps")} onToggle={() => onToggle("ps")}>
+            <StoryCard
+              src={pub("/mobile/playstation.png")}
+              alt="PlayStation и геймпады"
+              title={
+                <>
+                  Скучно не будет
+                  <br />
+                  никому
+                </>
+              }
+              text="Соберите команду или устройте дуэль один на один. В вашем распоряжении топовые игровые консоли и проверенная временем классика."
+            />
+            <BubbleField bubbles={PS_BUBBLES} />
+          </FoldCard>
+
+          <FoldCard title="Настольные игры" open={fold.includes("games")} onToggle={() => onToggle("games")}>
+            <StoryCard
+              src={pub("/mobile/board.png")}
+              alt="Настольные игры"
+              title={
+                <>
+                  Скучно не будет
+                  <br />
+                  никому
+                </>
+              }
+              text="Соберите команду или устройте дуэль один на один. В вашем распоряжении топовые игровые консоли и проверенная временем классика."
+            />
+            <BubbleField bubbles={BOARD_BUBBLES} />
+          </FoldCard>
+
+          <FoldCard anchor="menu" title="Еда" open={fold.includes("menu")} onToggle={() => onToggle("menu")}>
+            <StoryCard
+              src={pub("/mobile/food.png")}
+              alt="Хот-дог"
+              title="Подкрепиться и освежиться"
+              text="Сытный перекус или прохладный напиток — отдельно от тарифа за время."
+            />
+            <PriceRows
+              loose
+              rows={[
+                ["Пицца", "740 ₽"],
+                ["Хот-доги", "350 ₽"],
+                ["Начос", "350 ₽"],
+                ["Фисташки", "390 ₽"],
+                ["Начос", "350 ₽"],
+                ["Вяленое мясо", "350 ₽"],
+              ]}
+            />
+          </FoldCard>
+
+          <FoldCard title="Напитки" open={fold.includes("bar")} onToggle={() => onToggle("bar")}>
+            <StoryCard
+              src={pub("/mobile/drinks.png")}
+              alt="Банки крафтового пива"
+              title="Бар"
+              text="Сытный перекус или прохладный напиток — отдельно от тарифа за время."
+              fade="to-black"
+            />
+            <PriceRows
+              loose
+              rows={[
+                ["Классический лагер", "440 ₽"],
+                ["Насыщенный стаут", "440 ₽"],
+                ["Ароматный IPA", "440 ₽"],
+                ["Освежающий саур-эль", "440 ₽"],
+                ["Фирменные лимонады", "250 ₽"],
+                ["Cola /  Mountain Dew", "250 ₽"],
+              ]}
+            />
+          </FoldCard>
         </div>
       </div>
 
-      <section id="contacts" className="flex scroll-mt-16 flex-col gap-4 p-4">
-        <VenueMap cropped />
-        <address className="font-serif text-2xl leading-[33.6px] tracking-[-0.96px] not-italic">
+      <section id="contacts" className="relative flex h-[498px] scroll-mt-16 flex-col gap-4 overflow-hidden p-4">
+        <img src={pub("/mobile/map.png")} alt="" className="absolute inset-0 size-full object-cover object-bottom" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black to-50% to-transparent" />
+        <address className="font-bebas sme relative text-[25px] leading-none text-white not-italic">
           Санкт-Петербург
           <br />
           Средний проспект В.О., 27б
         </address>
-        <p className="mute">
+        <p className="relative pt-4 text-base leading-5 font-medium text-white/40">
           5 минут от м. «Василеостровская»
           <br />
           Вс–Чт 13:00–04:00
           <br />
           Пт–Сб 13:00–06:00
         </p>
-        <a href={MAP} target="_blank" rel="noopener" className="type-label w-fit border-b border-current pb-2 no-underline">
-          Построить маршрут
-        </a>
       </section>
-    </>
+    </div>
   );
 }
 
@@ -446,7 +536,7 @@ export default function App() {
       )}
       <InteractiveNebulaShader className="z-0" disableCenterDimming />
       <div className="relative z-10">
-      <header className={`fixed inset-x-0 top-0 z-50 grid h-16 grid-cols-3 items-center px-4 transition-opacity duration-500 md:h-auto md:grid-cols-[auto_1fr_auto] md:gap-8 md:bg-transparent md:px-8 md:py-4 ${chrome ? "opacity-100" : "pointer-events-none opacity-0"}`}>
+      <header className={`fixed inset-x-0 top-0 z-50 hidden h-16 grid-cols-3 items-center px-4 transition-opacity duration-500 md:grid md:h-auto md:grid-cols-[auto_1fr_auto] md:gap-8 md:bg-transparent md:px-8 md:py-4 ${chrome ? "md:opacity-100" : "md:pointer-events-none md:opacity-0"}`}>
         <span className="md:hidden" />
         <a href="#top" className="justify-self-center md:justify-self-start" aria-label="River Haze, наверх">
           <img src={pub("/Logo.svg")} alt="" width="80" height="80" className="h-9 w-9 md:h-[46px] md:w-[46px]" />
@@ -497,14 +587,22 @@ export default function App() {
 
       <main id="top">
         <section className="relative min-h-svh">
-          <img
-            src={pub("/Logo.svg")}
-            alt="River Haze"
-            width="80"
-            height="80"
-            className="logo-neon pointer-events-none absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
-            style={{ width: logoPx, height: logoPx }}
-          />
+          {narrow ? (
+            <img
+              src={pub("/mobile/logo.svg")}
+              alt="River Haze"
+              className="pointer-events-none absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
+            />
+          ) : (
+            <img
+              src={pub("/Logo.svg")}
+              alt="River Haze"
+              width="80"
+              height="80"
+              className="logo-neon pointer-events-none absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
+              style={{ width: logoPx, height: logoPx }}
+            />
+          )}
           <div className={`flex min-h-svh flex-col justify-end px-4 pt-16 pb-8 transition-opacity duration-700 md:px-8 md:pb-16 ${shown ? "opacity-100" : "opacity-0"}`}>
           <div className="relative hidden md:block">
             <h1 className="type-display max-w-[12em]">
@@ -526,21 +624,21 @@ export default function App() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-center gap-4 md:hidden">
+          <div className="mx-auto flex w-full max-w-[268px] flex-col gap-4 md:hidden">
             <button
               type="button"
               onClick={() => openBook("стол")}
-              className="rounded-[32px] border border-white/25 bg-white/10 px-8 py-4 text-center text-sm leading-6 tracking-[1px] uppercase shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-xl backdrop-saturate-150"
+              className="w-full rounded-[32px] bg-white/8 px-8 py-[26px] text-center text-[25px] leading-none whitespace-nowrap text-white"
             >
-              Забронировать
+              <span className="font-bebas sme-center text-[25px] leading-none">Забронировать</span>
             </button>
             <a
               href={pub("/menu.pdf")}
               target="_blank"
               rel="noopener"
-              className="rounded-[32px] px-8 py-4 text-center text-sm leading-[18.72px] tracking-[1.5px] text-[rgba(244,241,234,0.6)] uppercase no-underline"
+              className="w-full rounded-[32px] px-8 py-[26px] text-center text-[25px] leading-none whitespace-nowrap text-white no-underline"
             >
-              Посмотреть Меню
+              <span className="font-bebas sme-center">Посмотреть Меню</span>
             </a>
           </div>
           </div>
