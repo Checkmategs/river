@@ -7,11 +7,108 @@ const pub = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, 
 const NAV = [
   ["#about", "О нас"],
   ["#tariffs", "Тарифы"],
+  ["#hookahs", "Кальяны"],
   ["#events", "Зал"],
   ["#games", "Игры"],
   ["#menu", "Меню"],
+  ["#reviews", "Отзывы"],
   ["#contacts", "Контакты"],
 ];
+
+const HOOKAH_BRANDS: [string, string][] = [
+  ["Darkside", "darkside.png"],
+  ["Must Have", "musthave.png"],
+  ["Black Burn", "blackburn.png"],
+  ["Trofimoff's", "trofimoffs.png"],
+  ["Morpheus", "morpheus.png"],
+  ["Sebero", "sebero.png"],
+  ["Spectrum", "spectrum.png"],
+  ["Overdose", "overdose.png"],
+  ["Bonche", "bonche.png"],
+  ["Chabacco", "chabacco.png"],
+  ["Догма", "dogma.png"],
+];
+
+const HOOKAH_TIERS: [string, string, string][] = [
+  ["База", "Чайный лист", "0 ₽"],
+  ["Премиальный", "Burley", "550 ₽"],
+  ["Сигарный", "Сигарный лист", "750 ₽"],
+];
+
+const REVIEWS: { name: string; initials: string; tint: string; stars: number; text: string }[] = [
+  {
+    name: "Аня",
+    initials: "А",
+    tint: "#3a2f5c",
+    stars: 5,
+    text: "Пришли после работы — кальян дымный, чай безлимит, застряли на настолках до трёх ночи. Уже наше место.",
+  },
+  {
+    name: "Максим",
+    initials: "М",
+    tint: "#1f3a4a",
+    stars: 5,
+    text: "Соло-вечер на PS5: FIFA, кальян и никто не торопит. Второй раз за месяц — и снова до закрытия.",
+  },
+  {
+    name: "Даша",
+    initials: "Д",
+    tint: "#4a2a38",
+    stars: 5,
+    text: "Караоке и компания — идеально. На бронь ответили быстро, стол у окна, атмосфера мягкая и без суеты.",
+  },
+  {
+    name: "Игорь",
+    initials: "И",
+    tint: "#2a3540",
+    stars: 5,
+    text: "Тариф прозрачный, без сюрпризов в чеке. Чай реально безлимитный, кальян меняют без лишних вопросов.",
+  },
+];
+
+function Stars({ count }: { count: number }) {
+  return (
+    <span className="flex shrink-0 gap-0.5" aria-label={`${count} из 5`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill={i < count ? "#f0a43a" : "rgba(255,255,255,0.16)"}
+            d="M12 2.6l2.7 6.2 6.7.6-5.1 4.4 1.5 6.5L12 16.9 6.2 20.3l1.5-6.5L2.6 9.4l6.7-.6L12 2.6z"
+          />
+        </svg>
+      ))}
+    </span>
+  );
+}
+
+function ReviewCard({ name, initials, tint, stars, text }: (typeof REVIEWS)[number]) {
+  return (
+    <article className="rounded-[32px] border-t border-white/8 bg-white/8 p-5 md:p-6">
+      <header className="mb-4 flex items-center gap-3">
+        <span
+          className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-medium text-white/90"
+          style={{ background: tint }}
+          aria-hidden="true"
+        >
+          {initials}
+        </span>
+        <span className="min-w-0 flex-1 text-base leading-5 font-medium text-white">{name}</span>
+        <Stars count={stars} />
+      </header>
+      <p className="text-base leading-6 font-medium text-white/55">{text}</p>
+    </article>
+  );
+}
+
+function ReviewsList({ className = "" }: { className?: string }) {
+  return (
+    <div className={`grid grid-cols-1 gap-3 md:gap-4 ${className}`}>
+      {REVIEWS.map((review) => (
+        <ReviewCard key={review.name} {...review} />
+      ))}
+    </div>
+  );
+}
 
 const TITLES = {
   стол: "Забронировать стол",
@@ -145,9 +242,10 @@ function useNarrow() {
   return narrow;
 }
 
-type Fold = "events" | "ps" | "games" | "menu" | "bar";
+type Fold = "hookah" | "events" | "ps" | "games" | "menu" | "bar";
 
 const FOLD_BY_HASH: Partial<Record<string, Fold>> = {
+  "#hookahs": "hookah",
   "#events": "events",
   "#games": "ps",
   "#menu": "menu",
@@ -259,6 +357,64 @@ function StoryCard({
   );
 }
 
+function HookahCard() {
+  return (
+    <div className="relative flex h-[524px] w-full flex-col justify-between overflow-hidden rounded-[30px] p-2">
+      <img
+        src={pub("/mobile/hookahs/hero.png")}
+        alt="Кальян Hoob"
+        className="absolute inset-0 size-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-transparent via-[48%] to-black/90" />
+      <div className="relative flex flex-wrap content-start gap-1.5">
+        {HOOKAH_BRANDS.map(([name, file]) => (
+          <span
+            key={name}
+            className="flex h-[41px] items-center gap-1.5 rounded-[20px] bg-white/15 py-1 pr-2 pl-1"
+          >
+            <img
+              src={pub(`/mobile/hookahs/${file}`)}
+              alt=""
+              className="size-[33px] rounded-full object-cover"
+            />
+            <span className="text-[11px] leading-[14px] font-semibold whitespace-nowrap text-[#fff4f4]/90">
+              {name}
+            </span>
+          </span>
+        ))}
+      </div>
+      <div className="relative flex flex-col gap-1.5 p-2">
+        <h3 className="font-bebas sme text-[40px] leading-none text-[#f4f1ea]">Выбирай свой</h3>
+        <p className="text-base leading-5 font-medium text-[#f4f1ea]/68">
+          Идеальное пространство для дня рождения, корпоратива, турнира по видеоиграм или громкого караоке-вечера
+          без посторонних глаз.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function TierRows({ rows }: { rows: [string, string, string][] }) {
+  return (
+    <div className="overflow-hidden rounded-[32px] border-t border-white/8 bg-white/5 p-4">
+      {rows.map(([title, sub, price], index) => (
+        <div
+          key={title}
+          className={`flex items-center justify-between gap-4 p-4 ${index < rows.length - 1 ? "border-b border-white/8" : ""}`}
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-base leading-5 font-medium">
+            <span className="shrink-0 whitespace-nowrap text-white">{title}</span>
+            <span className="min-w-0 whitespace-nowrap text-white/40">{sub}</span>
+          </div>
+          <span className="font-bebas sme-end shrink-0 text-[25px] leading-none whitespace-nowrap text-white">
+            {money(price)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function FoldCard({
   anchor,
   title,
@@ -358,6 +514,11 @@ function MobilePage({
         </section>
 
         <div className="flex flex-col gap-2">
+          <FoldCard anchor="hookahs" title="Кальяны" open={fold.includes("hookah")} onToggle={() => onToggle("hookah")}>
+            <HookahCard />
+            <TierRows rows={HOOKAH_TIERS} />
+          </FoldCard>
+
           <FoldCard anchor="events" title="Караоке комната" open={fold.includes("events")} onToggle={() => onToggle("events")}>
             <StoryCard
               src={pub("/mobile/karaoke.png")}
@@ -448,6 +609,12 @@ function MobilePage({
           </FoldCard>
         </div>
       </div>
+
+      <section id="reviews" className="flex scroll-mt-16 flex-col gap-4 p-4">
+        <h2 className="font-bebas sme text-[36px] leading-none text-white">Отзывы</h2>
+        <p className="text-base leading-5 font-medium text-white/40">Гости про вечера в River Haze</p>
+        <ReviewsList />
+      </section>
 
       <section id="contacts" className="relative flex h-[498px] scroll-mt-16 flex-col gap-4 overflow-hidden p-4">
         <img src={pub("/mobile/map.png")} alt="" className="absolute inset-0 size-full object-cover object-bottom" />
@@ -731,8 +898,41 @@ export default function App() {
           </LinkButton>
         </section>
 
+        <section id="hookahs" className={`bg-hookahs ${band}`}>
+          <Index n="03" label="Кальяны" />
+          <div className="md:grid md:grid-cols-[1.15fr_0.85fr] md:items-end md:gap-16">
+            <h2 className="type-display">Выбирай свой</h2>
+            <p className="mute mt-4 md:mt-0">
+              Базовый кальян уже в тарифе. Премиум и сигарный лист — по желанию. В коллекции — топовые табаки.
+            </p>
+          </div>
+          <div className="mt-8 flex flex-wrap gap-2 md:mt-12">
+            {HOOKAH_BRANDS.map(([name, file]) => (
+              <span
+                key={name}
+                className="flex h-10 items-center gap-1.5 rounded-full border border-white/10 bg-white/8 py-1 pr-3 pl-1"
+              >
+                <img
+                  src={pub(`/mobile/hookahs/${file}`)}
+                  alt=""
+                  className="size-8 rounded-full object-cover"
+                />
+                <span className="text-sm font-medium text-white/90">{name}</span>
+              </span>
+            ))}
+          </div>
+          <div className="mt-8 grid gap-4 md:mt-16 md:grid-cols-[1.1fr_0.9fr] md:items-start md:gap-16">
+            <img
+              src={pub("/mobile/hookahs/hero.png")}
+              alt="Кальян Hoob"
+              className="-mx-4 aspect-[3/4] w-[calc(100%+2rem)] max-w-none object-cover md:mx-0 md:rounded-[32px] md:w-full"
+            />
+            <TierRows rows={HOOKAH_TIERS} />
+          </div>
+        </section>
+
         <section id="events" className={`bg-events ${band}`}>
-          <Index n="03" label="Аренда зала" />
+          <Index n="04" label="Аренда зала" />
           <div className="md:grid md:grid-cols-[0.85fr_1.15fr] md:items-end md:gap-16">
             <img src={pub("/Photo/2.webp")} alt="Общий зал с диванами и экраном" className="-mx-4 aspect-[4/5] w-[calc(100%+2rem)] max-w-none object-cover md:mx-0 md:w-full" />
             <div className="mt-8 md:mt-0">
@@ -774,7 +974,7 @@ export default function App() {
         </section>
 
         <section id="games" className={`bg-games ${band}`}>
-          <Index n="04" label="Игротека" />
+          <Index n="05" label="Игротека" />
           <h2 className="type-display max-w-[12ch]">
             Скучно не будет никому
           </h2>
@@ -808,7 +1008,7 @@ export default function App() {
         </section>
 
         <section id="menu" className={`bg-menu ${band}`}>
-          <Index n="05" label="Кухня и бар" />
+          <Index n="06" label="Кухня и бар" />
           <div className="md:grid md:grid-cols-[1.15fr_0.85fr] md:items-end md:gap-16">
             <h2 className="type-display">
               Подкрепиться и освежиться
@@ -838,8 +1038,17 @@ export default function App() {
           </div>
         </section>
 
+        <section id="reviews" className={`bg-reviews ${band}`}>
+          <Index n="07" label="Отзывы" />
+          <div className="md:grid md:grid-cols-[1.15fr_0.85fr] md:items-end md:gap-16">
+            <h2 className="type-display">Что говорят гости</h2>
+            <p className="mute mt-4 md:mt-0">Реальные вечера: кальян, игры, караоке и без спешки.</p>
+          </div>
+          <ReviewsList className="mt-8 md:mt-16 md:grid md:grid-cols-2 md:gap-4" />
+        </section>
+
         <section id="contacts" className={`bg-contacts ${band}`}>
-          <Index n="06" label="Контакты" />
+          <Index n="08" label="Контакты" />
           <h2 className="type-display max-w-[10ch]">
             Ждём вас в гости
           </h2>
